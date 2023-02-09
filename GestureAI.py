@@ -36,7 +36,18 @@ class handRecognition():
                     # highlight tip of thumb
                     if id == 4:
                         cv2.circle(img, (cx, cy), 10, (255, 0, 255), cv2.FILLED)
-
+                    # highlight tip of ptr
+                    if id == 8:
+                        cv2.circle(img, (cx,cy), 10, (255,0,255), cv2.FILLED)
+                    # highlight tip of mid
+                    if id == 12:
+                       cv2.circle(img, (cx,cy), 10, (255,0,255), cv2.FILLED)    
+                    # highlight tip of ring
+                    if id == 16:
+                        cv2.circle(img, (cx,cy), 10, (255,0,255), cv2.FILLED)    
+                    # highlight tip of pinky
+                    if id == 20:
+                     cv2.circle(img, (cx,cy), 10, (255,0,255), cv2.FILLED)
                 mpDraw.draw_landmarks(img, hand, mpHands.HAND_CONNECTIONS)
 
 
