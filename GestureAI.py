@@ -9,7 +9,7 @@ hands = mpHands.Hands(False, 2, 0.5, 0.5)
 mpDraw = mp.solutions.drawing_utils
 
 while True:
-    img = cap.read()
+    success, img = cap.read()
 
     # convert camera feed to RGB
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
