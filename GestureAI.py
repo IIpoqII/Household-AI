@@ -1,9 +1,7 @@
 import cv2
 import mediapipe as mp
 
-
-
-class handRecognition():
+class HandRecognition():
     def __int__(self, mode=False, maxHands=2, detectionConf=0.5, trackingConf=0.5):
         self.mode = mode
         self.maxHands = maxHands
@@ -15,15 +13,15 @@ class handRecognition():
         self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.detectionConf, self.trackingConf)
         self.mpDraw = mp.solutions.drawing_utils
 
-    def findHands(self):
+    def handPosition(self, img, draw = True):
         # convert camera feed to RGB
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        result = hands.process(imgRGB)
+        result = self.hands.process(imgRGB)
 
         # visualize multiple hand
         if result.multi_hand_landmarks:
             for hand in result.multi_hand_landmarks:
-
+                     
                 # identifies landmarks on each hand
                 for id, lm in enumerate(hand.landmark):
                     h, w, c = img.shape
@@ -32,7 +30,6 @@ class handRecognition():
                     # highlight root of palm
                     if id == 0:
                         cv2.circle(img, (cx, cy), 10, (255, 0, 255), cv2.FILLED)
-
                     # highlight tip of thumb
                     if id == 4:
                         cv2.circle(img, (cx, cy), 10, (255, 0, 255), cv2.FILLED)
@@ -48,21 +45,24 @@ class handRecognition():
                     # highlight tip of pinky
                     if id == 20:
                      cv2.circle(img, (cx,cy), 10, (255,0,255), cv2.FILLED)
-                mpDraw.draw_landmarks(img, hand, mpHands.HAND_CONNECTIONS)
-
+                if draw:
+                    self.mpDraw.draw_landmarks(img, hand, self.mpHands.HAND_CONNECTIONS)
+                
+            return img
 
 
 
 def main():
-    success, cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0)
+    a = HandRecognition()
 
     while True:
-        img = cap.read()
-
+        success, img = cap.read()
+        img = a.handPosition(img)
 
         cv2.imshow("Camera", img)
         cv2.waitKey(1)
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     main()
