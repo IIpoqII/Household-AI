@@ -1,38 +1,57 @@
 import cv2
 import mediapipe as mp
 
-cap = cv2.VideoCapture(0)
 
-# mediapipe module for
-mpHands = mp.solutions.hands
-hands = mpHands.Hands(False, 2, 0.5, 0.5)
-mpDraw = mp.solutions.drawing_utils
 
-while True:
-    success, img = cap.read()
+class handRecognition():
+    def __int__(self, mode=False, maxHands=2, detectionConf=0.5, trackingConf=0.5):
+        self.mode = mode
+        self.maxHands = maxHands
+        self.detectionConf = detectionConf
+        self.trackingConf = trackingConf
 
-    # convert camera feed to RGB
-    imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    result = hands.process(imgRGB)
+        # mediapipe module for
+        self.mpHands = mp.solutions.hands
+        self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.detectionConf, self.trackingConf)
+        self.mpDraw = mp.solutions.drawing_utils
 
-    # visualize multiple hand
-    if result.multi_hand_landmarks:
-        for hand in result.multi_hand_landmarks:
+    def findHands(self):
+        # convert camera feed to RGB
+        imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        result = hands.process(imgRGB)
 
-            # identifies landmarks on each hand
-            for id, lm in enumerate(hand.landmark):
-                h,w,c = img.shape
-                cx, cy = int(lm.x*w), int (lm.y*h)
+        # visualize multiple hand
+        if result.multi_hand_landmarks:
+            for hand in result.multi_hand_landmarks:
 
-                # highlight root of palm
-                if id == 0:
-                    cv2.circle(img, (cx,cy), 10, (255,0,255), cv2.FILLED)
+                # identifies landmarks on each hand
+                for id, lm in enumerate(hand.landmark):
+                    h, w, c = img.shape
+                    cx, cy = int(lm.x * w), int(lm.y * h)
 
-                # highlight tip of thumb
-                if id == 4:
-                    cv2.circle(img, (cx,cy), 10, (255,0,255), cv2.FILLED)
+                    # highlight root of palm
+                    if id == 0:
+                        cv2.circle(img, (cx, cy), 10, (255, 0, 255), cv2.FILLED)
 
-            mpDraw.draw_landmarks(img, hand, mpHands.HAND_CONNECTIONS)
+                    # highlight tip of thumb
+                    if id == 4:
+                        cv2.circle(img, (cx, cy), 10, (255, 0, 255), cv2.FILLED)
 
-    cv2.imshow("Camera", img)
-    cv2.waitKey(1)
+                mpDraw.draw_landmarks(img, hand, mpHands.HAND_CONNECTIONS)
+
+
+
+
+def main():
+    success, cap = cv2.VideoCapture(0)
+
+    while True:
+        img = cap.read()
+
+
+        cv2.imshow("Camera", img)
+        cv2.waitKey(1)
+
+
+if __name__ == "main":
+    main()
