@@ -54,15 +54,26 @@ class RotateHandGesture():
             angle = self.get_angle(x1, y1, x2, y2, x3, y3)
             increment = round(angle/5)
             if increment <= -2 or increment >= 2:
-                self.volume_control(img)
+                volume = self.volume_control(img, volume, increment)
 
             threshold = self.detect(img, lmList)
             self.draw_angle(img, x1, y1, x2, y2, x3, y3)
             cv2.imshow("Camera", img)
             cv2.waitKey(1)
 
-    def volume_control(self, img):
-        cv2.rectangle(img, (10, 10), (50, 20), (255, 127, 0), 2, cv2.FILLED)
+    def volume_control(self, img, volume, incr):
+        max_vol = 100
+        min_vol = 0
+
+        # bounds volume
+        if volume > max_vol:
+            volume = 100
+        if volume < min_vol:
+            volume = 0
+
+        # increments volume
+        if incr <= -2 or incr >= 2:
+            volume = round(volume + incr / 4)
 
 
 def main():
