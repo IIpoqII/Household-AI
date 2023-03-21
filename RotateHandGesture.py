@@ -11,7 +11,7 @@ class RotateHandGesture():
         cv2.line(img, (x1, y1), (x2, y2), (255, 127, 0), 3)
         cv2.line(img, (x2, y2), (x3, y3), (255, 127, 0), 3)
 
-    def detect(self, img, lmList, lower_bound=0.45, upper_bound=0.75):
+    def detect(self, img, lmList, lower_bound=0.30, upper_bound=0.75):
         x1, y1 = lmList[4][1], lmList[4][2]
         x2, y2 = lmList[8][1], lmList[8][2]
         x3, y3 = lmList[12][1], lmList[12][2]
@@ -38,6 +38,10 @@ class RotateHandGesture():
             angle = round(math.degrees(angle))
         return angle
 
+    def draw_angle(self, img, x1, y1, x2, y2, x3, y3):
+        cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 3)
+        cv2.line(img, (x1, y1), (x3, y3), (255, 127, 0), 3)
+
     def execute(self, capture, img, lmList, threshold=True):
         x1, y1 = lmList[4][1], lmList[4][2]
         x2, y2 = lmList[12][1], lmList[12][2]
@@ -53,6 +57,7 @@ class RotateHandGesture():
                 self.volume_control(img)
 
             threshold = self.detect(img, lmList)
+            self.draw_angle(img, x1, y1, x2, y2, x3, y3)
             cv2.imshow("Camera", img)
             cv2.waitKey(1)
 
@@ -69,8 +74,8 @@ def main():
 
     while True:
         success, img = capture.read()
-        img = ht.track_hand(img)
-        lmList = ht.get_landmarks_positions(img)
+        img = ht.HandRecognition().track_hand(img)
+        lmList = ht.HandRecognition().get_landmarks_positions(img)
         if RotateHandGesture().detect(lmList):
             RotateHandGesture().execute(capture, img, lmList)
 
