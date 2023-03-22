@@ -1,11 +1,12 @@
 import cv2
 import math
-import HandTracker as ht
+import HandTracker
 
 
 class RotateHandGesture():
-    def __init__(self):
-        self.hand_tracker = ht.HandRecognition()
+    def __init__(self, volume=50):
+        self.ht = HandTracker.HandRecognition()
+        self.volume = volume
 
     def draw_gesture(self, img, x1, y1, x2, y2, x3, y3):
         cv2.line(img, (x1, y1), (x2, y2), (255, 127, 0), 3)
@@ -22,7 +23,6 @@ class RotateHandGesture():
         ratio = 0
         if len1 != 0:
             ratio = round(len2 / len1, 2)
-        print(ratio)
         return lower_bound <= ratio <= upper_bound
 
     def get_angle(self, x1, y1, x2, y2, x3, y3):
@@ -47,14 +47,13 @@ class RotateHandGesture():
         x2, y2 = lmList[12][1], lmList[12][2]
         while threshold:
             success, img = capture.read()
-            img = ht.track_hand(img)
-            lmList = ht.get_landmarks_positions(img)
+            img = self.ht.track_hand(img)
+            lmList = self.ht.get_landmarks_positions(img)
 
             x3, y3 = lmList[12][1], lmList[12][2]
             angle = self.get_angle(x1, y1, x2, y2, x3, y3)
             increment = round(angle/5)
-            if increment <= -2 or increment >= 2:
-                volume = self.volume_control(img, volume, increment)
+            self.volume = self.volume_control(img, self.volume, increment)
 
             threshold = self.detect(img, lmList)
             self.draw_angle(img, x1, y1, x2, y2, x3, y3)
@@ -75,19 +74,25 @@ class RotateHandGesture():
         if incr <= -2 or incr >= 2:
             volume = round(volume + incr / 4)
 
+        # draws visual
+        cv2.rectangle(img, (20, 20), (40, 120), (255, 127, 0), 2)
+        cv2.rectangle(img, (20, 120 - volume), (40, 120), (255, 127, 0), -1)
+
+        return volume
+
 
 def main():
     cam_width, cam_height = 1280, 720
-
     capture = cv2.VideoCapture(0)
     capture.set(3, cam_width)
     capture.set(4, cam_height)
+    ht = HandTracker.HandRecognition()
 
     while True:
         success, img = capture.read()
-        img = ht.HandRecognition().track_hand(img)
-        lmList = ht.HandRecognition().get_landmarks_positions(img)
-        if RotateHandGesture().detect(lmList):
+        img = ht.track_hand(img)
+        lmList = ht.get_landmarks_positions(img)
+        if RotateHandGesture().detect(img, lmList):
             RotateHandGesture().execute(capture, img, lmList)
 
         cv2.imshow("Camera", img)
