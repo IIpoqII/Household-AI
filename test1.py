@@ -1,4 +1,5 @@
 import cv2
+
 import mediapipe as mp
 import math
 import time
@@ -119,7 +120,7 @@ def main():
         cv2.waitKey(1)
 
         ratio = test_ratio(img, lmList)
-        lower_bound = 0.45
+        lower_bound = 0.3
         upper_bound = 0.75
 
         x1, y1 = lmList[4][1], lmList[4][2]
