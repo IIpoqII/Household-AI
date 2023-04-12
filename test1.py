@@ -120,7 +120,11 @@ def main():
         cv2.waitKey(1)
 
         ratio = test_ratio(img, lmList)
+<<<<<<< HEAD
         lower_bound = 0.3
+=======
+        lower_bound = 0.30
+>>>>>>> 46381dd8ce5fae6a8f8906a93b215edd7c836d9d
         upper_bound = 0.75
 
         x1, y1 = lmList[4][1], lmList[4][2]
