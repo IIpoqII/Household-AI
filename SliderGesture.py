@@ -11,7 +11,7 @@ class SliderGesture():
     def draw_gesture(self, img, x1, y1, x2, y2):
         cv2.line(img, (x1, y1), (x2, y2), (255, 127, 0), 3)
 
-    def detect(self, img, lmList, lower_bound=1, upper_bound=40):
+    def detect(self, lmList, lower_bound=1, upper_bound=40):
         x1, y1 = lmList[4][1], lmList[4][2]
         x2, y2 = lmList[8][1], lmList[8][2]
         distance = math.sqrt(math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2))
@@ -26,12 +26,14 @@ class SliderGesture():
             distance = -distance
         return distance
 
-    def execute(self, capture, img, lmList, threshold=True):
+    def execute(self, capture, lmList, handNum, threshold=True):
         x1, y1 = lmList[4][1], lmList[4][2]
         while threshold:
             success, img = capture.read()
             img = self.ht.track_hand(img)
-            lmList = self.ht.get_landmarks_positions(img)
+            if self.ht.count_hands() != handNum + 1:
+                break
+            lmList = self.ht.get_landmarks_positions(img)[handNum]
 
             # processes and executes instruction
             x2, y2 = lmList[4][1], lmList[4][2]
@@ -42,7 +44,7 @@ class SliderGesture():
                 self.slider_position = new_slider_position
                 x1, y1 = lmList[4][1], lmList[4][2]
 
-            threshold = self.detect(img, lmList)
+            threshold = self.detect(lmList)
             cv2.imshow("Camera", img)
             cv2.waitKey(1)
 
@@ -65,25 +67,3 @@ class SliderGesture():
         cv2.circle(img, (20 + 2*slider_position, 20), 5, (255, 127, 0), cv2.FILLED)
 
         return slider_position
-
-
-def main():
-    cam_width, cam_height = 1280, 720
-    capture = cv2.VideoCapture(0)
-    capture.set(3, cam_width)
-    capture.set(4, cam_height)
-    ht = HandTracker.HandRecognition()
-
-    while True:
-        success, img = capture.read()
-        img = ht.track_hand(img)
-        lmList = ht.get_landmarks_positions(img)
-        if SliderGesture().detect(img, lmList):
-            SliderGesture().execute(capture, img, lmList)
-
-        cv2.imshow("Camera", img)
-        cv2.waitKey(1)
-
-
-if __name__ == "__main__":
-    main()
