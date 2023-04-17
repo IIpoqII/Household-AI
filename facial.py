@@ -8,7 +8,7 @@ def compare_faces(images,test):
     
     
     test_encoding = face_recognition.face_encodings(test)[0]
-    print(face_recognition.face_distance(face_encodings,test_encoding))
+   
     return face_recognition.compare_faces(face_encodings,test_encoding)
 # images= ["C:\\Users\\anujv\\OneDrive\\Pictures\\Camera Roll\\Anuj.jpg"]
 
