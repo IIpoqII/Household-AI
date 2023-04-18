@@ -17,7 +17,7 @@ ExpandFrame = ExpandFrameGesture.ExpandFrameGesture()
 
 while True:
     success, img = capture.read()
-    img = cv2.flip(img, 1)
+    # img = cv2.flip(img, 1)
     img = ht.track_hand(img)
     cv2.imshow("Camera", img)
     cv2.waitKey(1)
