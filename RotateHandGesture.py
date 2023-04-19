@@ -22,7 +22,7 @@ class RotateHandGesture:
             ratio = round(len2 / len1, 2)
         return lower_bound <= ratio <= upper_bound
 
-    def execute(self, capture, lm_list, hand_num, scale=1, min_incr=1, threshold=True):
+    def execute(self, capture, lm_list, hand_num, hand_count, scale=2, min_incr=1, threshold=True):
         # scale affects the physical_movement:rotation ratio
         # higher means rotating the "knob" requires more physical movement
         incr = 0
@@ -32,7 +32,7 @@ class RotateHandGesture:
             success, img = capture.read()
             img = cv2.flip(img, 1)
             img = self.ht.track_hand(img)
-            if self.ht.count_hands() != hand_num + 1:
+            if self.ht.count_hands() != hand_count:
                 break
 
             # processes and executes instruction
