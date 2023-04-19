@@ -96,6 +96,20 @@ class HandRecognition:
             hands_list.append(hand.handedness)
         return hands_list
 
+    def print_hand(self, print_lm_list=False, print_orientation=False, print_handedness=False):
+        hands_list = self.get_hands()
+        for hand in hands_list:
+            print("Hand", hands_list.index(hand))
+            if print_lm_list:
+                print("      ", hand.lm_list)
+            if print_orientation:
+                print("      ", hand.orientation)
+            if print_handedness:
+                print("      ", hand.handedness)
+        if hands_list:
+            print()
+        return
+
 
 def main():
     cam_width, cam_height = 1280, 720
@@ -108,11 +122,7 @@ def main():
         success, img = capture.read()
         img = cv2.flip(img, 1)
         img = ht.track_hand(img)
-        hands_list = ht.get_hands()
-        for hand in hands_list:
-            print("Hand", hands_list.index(hand), "   ", hand.lm_list[0])
-        if hands_list:
-            print()
+        ht.print_hand(print_orientation=True)
 
         cv2.imshow("Camera", img)
         cv2.waitKey(1)
