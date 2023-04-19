@@ -17,14 +17,14 @@ class SliderGesture:
         distance = math.sqrt(math.pow(x1 - x2, 2) + math.pow(y1 - y2, 2))
         return lower_bound <= distance <= upper_bound
 
-    def execute(self, capture, lm_list, hand_num, scale=0.4, min_incr=1, threshold=True):
+    def execute(self, capture, lm_list, hand_num, hand_count, scale=0.4, min_incr=1, threshold=True):
         incr = 0
         x1, y1 = lm_list[4][1], lm_list[4][2]
         while threshold and -min_incr < incr < min_incr:
             success, img = capture.read()
             img = cv2.flip(img, 1)
             img = self.ht.track_hand(img)
-            if self.ht.count_hands() != hand_num + 1:
+            if self.ht.count_hands() != hand_count:
                 break
 
             # processes and executes instruction
