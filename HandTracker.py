@@ -5,7 +5,7 @@ import types
 from google.protobuf.json_format import MessageToDict
 
 
-class HandRecognition():
+class HandRecognition:
     def __init__(self, mode=False, max_hands=4, complexity=1, detection_confidence=0.6, tracking_confidence=0.6):
         self.results = None
 
