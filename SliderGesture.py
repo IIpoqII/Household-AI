@@ -1,6 +1,7 @@
 import cv2
 import math
 import HandTracker
+import time
 
 
 class SliderGesture:
@@ -20,7 +21,10 @@ class SliderGesture:
     def execute(self, capture, lm_list, hand_num, hand_count, scale=0.4, min_incr=1, threshold=True):
         incr = 0
         x1, y1 = lm_list[4][1], lm_list[4][2]
-        while threshold and -min_incr < incr < min_incr:
+        start_time = time.time()
+        while (threshold and -min_incr < incr < min_incr) or (time.time() - start_time < 1):
+            if threshold:
+                start_time = time.time()
             success, img = capture.read()
             img = cv2.flip(img, 1)
             img = self.ht.track_hand(img)
@@ -34,8 +38,9 @@ class SliderGesture:
             incr = scale * dist
             if incr <= -min_incr or incr >= min_incr:
                 self.slider_control(img, incr)
-            self.draw_gesture(img, x1, y1, x2, y2)
+                x1, y1 = x2, y2
 
+            self.draw_gesture(img, x1, y1, x2, y2)
             threshold = self.detect(lm_list)
             cv2.imshow("Camera", img)
             cv2.waitKey(1)
