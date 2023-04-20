@@ -24,6 +24,12 @@ while True:
 
     hands_list = ht.get_hands()
     hand_count = ht.count_hands()
+    # detect multi-handed gestures
+    if len(hands_list) > 1:
+        for hand1 in hands_list:
+            for hand2 in hands_list:
+                if ResizeFrame.detect(hand1, hand2):
+                    ResizeFrame.execute(capture, hand1, hand2, hands_list.index(hand1), hands_list.index(hand2), hand_count)
     if len(hands_list) > 0:
         # detect one-handed gestures
         for hand in hands_list:
@@ -32,9 +38,3 @@ while True:
                 RotateHand.execute(capture, lm_list, hands_list.index(hand), hand_count)
             if Slider.detect(lm_list):
                 Slider.execute(capture, lm_list, hands_list.index(hand), hand_count)
-        # # detect multi-handed gestures
-        # if len(hands_list) > 1:
-        #     for hand1 in hands_list:
-        #         for hand2 in hands_list:
-        #             if ResizeFrame.detect(hand1, hand2):
-        #                 ResizeFrame.execute(capture, hand1, hand2, hands_list.index(hand1), hands_list.index(hand2), hand_count)
