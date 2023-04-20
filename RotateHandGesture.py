@@ -1,6 +1,7 @@
 import cv2
 import math
 import HandTracker
+import time
 
 
 class RotateHandGesture:
@@ -28,7 +29,10 @@ class RotateHandGesture:
         incr = 0
         x1, y1 = lm_list[4][1], lm_list[4][2]
         x2, y2 = lm_list[12][1], lm_list[12][2]
-        while threshold and -min_incr < incr < min_incr:
+        start_time = time.time()
+        while (threshold and -min_incr < incr < min_incr) or (time.time() - start_time < 1):
+            if threshold:
+                start_time = time.time()
             success, img = capture.read()
             img = cv2.flip(img, 1)
             img = self.ht.track_hand(img)
@@ -42,8 +46,10 @@ class RotateHandGesture:
             incr = angle / scale
             if incr <= -min_incr or incr >= min_incr:
                 self.volume_control(img, incr)
-            self.draw_gesture(img, x1, y1, x2, y2, x3, y3)
+                x1, y1 = lm_list[4][1], lm_list[4][2]
+                x2, y2 = x3, y3
 
+            self.draw_gesture(img, x1, y1, x2, y2, x3, y3)
             threshold = self.detect(lm_list)
             cv2.imshow("Camera", img)
             cv2.waitKey(1)
