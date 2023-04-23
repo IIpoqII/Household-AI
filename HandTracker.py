@@ -117,7 +117,7 @@ class HandRecognition:
         hands_list = self.get_hands()
         for hand in hands_list:
             x, y = hand.lm_list[8][1], hand.lm_list[8][2]
-            text = "Hand " + str(hands_list.index(hand))
+            text = "Hand " + str(hands_list.index(hand)) + ", " + hand.handedness
             img = cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
         return img
 
