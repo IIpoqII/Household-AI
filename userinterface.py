@@ -2,13 +2,20 @@ import wx
 from facial import compare_faces
 import cv2 as cv
 import face_recognition
+import time
 class MyFrame(wx.Frame):  
       
     def __init__(self):
         super().__init__(parent=None, title='Household AI')
         panel = wx.Panel(self)
-        login = wx.Button(panel, label='Login', pos=(5, 55))
+        
+        image_file = 'C://Users//anujv//Household-AI//door.jpg'
+        image = wx.Image(image_file, wx.BITMAP_TYPE_ANY)
+        bmp = wx.StaticBitmap(panel, wx.ID_ANY, wx.BitmapFromImage(image))
+        login = wx.Button(panel, label='Login', pos=(5, 230))
         login.Bind(wx.EVT_BUTTON, self.face)
+          
+        
         self.Show()
        
     def gestures(self):
@@ -31,10 +38,11 @@ class MyFrame(wx.Frame):
             cv.imshow('frame', img)
             if cv.waitKey(1) & 0xFF == ord(' '):
                 break
-        images= ["C:\\Users\\anujv\\OneDrive\\Pictures\\Camera Roll\\Anuj.jpg"]
+        images= ["Household-AI/Anuj.jpg"]
         
         if(any(compare_faces(images,img))):
             wx.MessageBox('login succeeded', 'Household AI')
+            
             cv.destroyAllWindows()
             self.Hide()
             self.gestures()
