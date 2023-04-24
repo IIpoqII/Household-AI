@@ -133,6 +133,7 @@ def test():
         success, img = capture.read()
         img = cv2.flip(img, 1)
         img = ht.track_hand(img, identify_hand_num=True)
+        print("Number of hands: ", ht.count_hands())
 
         cv2.imshow("Camera", img)
         cv2.waitKey(1)
