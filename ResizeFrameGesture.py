@@ -50,7 +50,7 @@ class ResizeFrameGesture:
         dist_orig = self.get_distance(x1, y1, x2, y2)
         mdpt_orig = self.get_midpoint(x1, y1, x2, y2)
         start_time = time.time()
-        while (threshold and -min_size_incr < dist_diff < min_size_incr) or (time.time() - start_time < 0.5):
+        while (threshold and -min_size_incr < dist_diff < min_size_incr) or (time.time() - start_time < 30):
             if threshold:
                 start_time = time.time()
             success, img = capture.read()
@@ -71,30 +71,30 @@ class ResizeFrameGesture:
             mdpt_new = self.get_midpoint(x1, y1, x2, y2)
             if dist_diff <= -min_size_incr or dist_diff >= min_size_incr:
                 self.resize_frame_control(img, dist_diff)
-                dist_orig = dist_orig
+                dist_orig = dist_new
 
 
-            # processes and executes instruction for the move frame gesture
-            mdpt_orig = self.get_midpoint(x1, y1, x2, y2)
-            lm_list_left = self.ht.get_landmarks_positions()[hand_left_num]
-            lm_list_right = self.ht.get_landmarks_positions()[hand_right_num]
-            while self.detect_move_gesture(lm_list_left, lm_list_right):
-                success, img = capture.read()
-                img = cv2.flip(img, 1)
-                img = self.ht.track_hand(img)
-                if self.ht.count_hands() != hand_count:
-                    break
+            # # processes and executes instruction for the move frame gesture
+            # mdpt_orig = self.get_midpoint(x1, y1, x2, y2)
+            # lm_list_left = self.ht.get_landmarks_positions()[hand_left_num]
+            # lm_list_right = self.ht.get_landmarks_positions()[hand_right_num]
+            # while self.detect_move_gesture(lm_list_left, lm_list_right):
+            #     success, img = capture.read()
+            #     img = cv2.flip(img, 1)
+            #     img = self.ht.track_hand(img)
+            #     if self.ht.count_hands() != hand_count:
+            #         break
 
-                lm_list_left = self.ht.get_landmarks_positions()[hand_left_num]
-                lm_list_right = self.ht.get_landmarks_positions()[hand_right_num]
-                x1, y1 = lm_list_left[0][1], lm_list_left[0][2]
-                x2, y2 = lm_list_right[0][1], lm_list_right[0][2]
-                mdpt_new = self.get_midpoint(x1, y1, x2, y2)
-                x_diff = scale * (mdpt_new[0] - mdpt_orig[0])
-                y_diff = scale * (mdpt_new[1] - mdpt_orig[1])
-                if dist_diff <= -min_move_incr or dist_diff >= min_move_incr:
-                    self.move_frame_control(img, x_diff, y_diff)
-                    mdpt_orig = mdpt_new
+            #     lm_list_left = self.ht.get_landmarks_positions()[hand_left_num]
+            #     lm_list_right = self.ht.get_landmarks_positions()[hand_right_num]
+            #     x1, y1 = lm_list_left[0][1], lm_list_left[0][2]
+            #     x2, y2 = lm_list_right[0][1], lm_list_right[0][2]
+            #     mdpt_new = self.get_midpoint(x1, y1, x2, y2)
+            #     x_diff = scale * (mdpt_new[0] - mdpt_orig[0])
+            #     y_diff = scale * (mdpt_new[1] - mdpt_orig[1])
+            #     if dist_diff <= -min_move_incr or dist_diff >= min_move_incr:
+            #         self.move_frame_control(img, x_diff, y_diff)
+            #         mdpt_orig = mdpt_new
 
             # self.draw_trigger(img, left_hand, right_hand)
             self.draw_gesture(img, x1, y1, x2, y2, mdpt_new)
@@ -103,16 +103,15 @@ class ResizeFrameGesture:
             cv2.waitKey(1)
         return
 
-    def resize_frame_control(self, img, x_incr, y_incr, max_size=100, min_size=20, frame_incr=1):
+    def resize_frame_control(self, img, incr, max_size=100, min_size=20, frame_incr=1):
         # controls frame size
-        x_incr = round(x_incr * frame_incr)
-        y_incr = round(y_incr * frame_incr)
+        incr = round(incr * frame_incr)
         x1, y1 = self.frame_position[0][0], self.frame_position[0][1]
         x2, y2 = self.frame_position[1][0], self.frame_position[1][1]
-        x1 = x1 + x_incr
-        y1 = y1 + y_incr
-        x2 = x2 + x_incr
-        y2 = y2 + y_incr
+        x1 = x1 - incr
+        y1 = y1 - incr
+        x2 = x2 + incr
+        y2 = y2 + incr
         self.frame_position = ((x1, y1), (x2, y2))
         print(self.frame_position)
 
