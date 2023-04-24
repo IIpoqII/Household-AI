@@ -22,7 +22,7 @@ class HandRecognition:
         # hands_list stores hand objects with attributes lm_list, orientation, handedness
         self.hands_list = []
 
-    def track_hand(self, img, draw=True, cirRad=5, cirBGR=(255, 127, 0)):
+    def track_hand(self, img, draw=True, identify_hand_num=False, cirRad=5, cirBGR=(255, 127, 0)):
         # convert camera feed to RGB and identify hand
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results = self.recognized_hands.process(imgRGB)
@@ -33,7 +33,8 @@ class HandRecognition:
             # get data on each hand
             multi_hand_landmarks = self.results.multi_hand_landmarks
             multi_handedness_list = self.results.multi_handedness
-            for i in range(len(multi_hand_landmarks)):
+            n = len(multi_hand_landmarks) - 1
+            for i in range(n, -1, -1):
                 hand_num = multi_hand_landmarks[i]
                 if draw:
                     self.mpDraw.draw_landmarks(img, hand_num, self.mpHands.HAND_CONNECTIONS)
@@ -66,6 +67,8 @@ class HandRecognition:
                 else:
                     hand.handedness = "Error"
                 self.hands_list.append(hand)
+            if identify_hand_num:
+                self.identify_hand_num(img)
         return img
 
     def count_hands(self):
@@ -110,8 +113,16 @@ class HandRecognition:
             print()
         return
 
+    def identify_hand_num(self, img):
+        hands_list = self.get_hands()
+        for hand in hands_list:
+            x, y = hand.lm_list[8][1], hand.lm_list[8][2]
+            text = "Hand " + str(hands_list.index(hand)) + ", " + hand.handedness
+            img = cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+        return img
 
-def main():
+
+def test():
     cam_width, cam_height = 1280, 720
     capture = cv2.VideoCapture(0)
     capture.set(3, cam_width)
@@ -121,12 +132,12 @@ def main():
     while True:
         success, img = capture.read()
         img = cv2.flip(img, 1)
-        img = ht.track_hand(img)
-        ht.print_hand(print_orientation=True)
+        img = ht.track_hand(img, identify_hand_num=True)
+        print("Number of hands: ", ht.count_hands())
 
         cv2.imshow("Camera", img)
         cv2.waitKey(1)
 
 
 if __name__ == "__main__":
-    main()
+    test()
