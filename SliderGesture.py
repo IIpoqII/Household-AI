@@ -10,7 +10,8 @@ class SliderGesture:
         self.slider_position = default_value
         self.invert_controls = invert_controls
 
-    def detect(self, lm_list, lower_bound=1, upper_bound=40):
+    def detect(self, lm_list, lower_bound=1, upper_bound=20):
+        # threshold is the distance between the thumb and index fingers
         if not lm_list:
             return False
         x1, y1 = lm_list[4][1], lm_list[4][2]
@@ -21,10 +22,9 @@ class SliderGesture:
     def execute(self, capture, lm_list, hand_num, hand_count, scale=0.4, min_incr=1, threshold=True):
         incr = 0
         x1, y1 = lm_list[4][1], lm_list[4][2]
+        # provide a 0.1-second buffer when the threshold fails
         start_time = time.time()
-        while (threshold and -min_incr < incr < min_incr) or (time.time() - start_time < 1):
-            if threshold:
-                start_time = time.time()
+        while (threshold and -min_incr < incr < min_incr) or (time.time() - start_time < 0.1):
             success, img = capture.read()
             img = cv2.flip(img, 1)
             img = self.ht.track_hand(img)
@@ -44,6 +44,8 @@ class SliderGesture:
             threshold = self.detect(lm_list)
             cv2.imshow("Camera", img)
             cv2.waitKey(1)
+            if threshold:
+                start_time = time.time()
         return
 
     def slider_control(self, img, dist, max_dist=100, min_dist=0, slider_incr=1):
