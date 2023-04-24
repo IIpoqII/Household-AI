@@ -11,7 +11,7 @@ class RotateHandGesture:
         self.invert_controls = invert_controls
 
     def detect(self, lm_list, lower_bound=0.45, upper_bound=0.75):
-        # threshold is the ratio of the distance between the thumb and pointer fingers and the thumb and middle fingers
+        # threshold is the ratio of the distance between the thumb and index fingers and the thumb and middle fingers
         if not lm_list:
             return False
         ratio = 0
@@ -24,12 +24,12 @@ class RotateHandGesture:
             ratio = round(len2 / len1, 2)
         if lower_bound <= ratio <= upper_bound:
             # avoid exceptions
-            # (pointer and middle are touching thumb)
+            # (index and middle are touching thumb)
             dist1 = math.sqrt(math.pow(x2 - x1, 2) + math.pow(y3 - y1, 2))
             dist2 = math.sqrt(math.pow(x3 - x1, 2) + math.pow(y3 - y1, 2))
             if dist1 < 15 and dist2 < 15:
                 return False
-            # (pointer and middle are beneath thumb)
+            # (index and middle are beneath thumb)
             x4, y4, = lm_list[2][1], lm_list[2][2]
             dist1 = math.sqrt(math.pow(x2 - x4, 2) + math.pow(y3 - y4, 2))
             dist2 = math.sqrt(math.pow(x3 - x4, 2) + math.pow(y3 - y4, 2))
@@ -71,11 +71,11 @@ class RotateHandGesture:
         return
 
     def rotate_hand_control(self, img, incr, max_vol=100, min_vol=0, knob_incr=1):
-        # increments volume
+        # increments bar height
         incr = round(incr * knob_incr)
         self.bar_height = self.bar_height + incr
 
-        # bounds volume
+        # bounds bar height
         if self.bar_height > max_vol:
             self.bar_height = max_vol
         if self.bar_height < min_vol:
