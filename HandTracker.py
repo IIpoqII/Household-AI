@@ -54,9 +54,9 @@ class HandRecognition:
 
                 # get hand orientation
                 pts = np.asarray([lm_list[0], lm_list[5], lm_list[17]])
-                normal_vector = (np.cross(pts[2] - pts[0], pts[1] - pts[2])).astype('float64')
+                normal_vector = (np.cross(pts[2] - pts[0], pts[1] - pts[0])).astype('float64')
                 normal_vector /= np.linalg.norm(normal_vector)
-                hand.orientation = normal_vector
+                hand.orientation_vector = normal_vector
 
                 # get handedness
                 label = MessageToDict(multi_handedness_list[i])['classification'][0]['label']
@@ -85,13 +85,6 @@ class HandRecognition:
             hands_list.append(hand.lm_list)
         return hands_list
 
-    def get_hand_orientation(self):
-        # hands_list[] is a list of orientations for each hand
-        hands_list = []
-        for hand in self.hands_list:
-            hands_list.append(hand.orientation)
-        return hands_list
-
     def get_handedness(self):
         # hands_list[] is a list of handedness for each hand
         hands_list = []
@@ -99,26 +92,42 @@ class HandRecognition:
             hands_list.append(hand.handedness)
         return hands_list
 
-    def print_hand(self, print_lm_list=False, print_orientation=False, print_handedness=False):
+    def get_hand_orientation(self):
+        # hands_list[] is a list of orientations for each hand
+        hands_list = []
+        for hand in self.hands_list:
+            hands_list.append(hand.orientation)
+        return hands_list
+
+    def get_hand_orientation_vector(self):
+        # hands_list[] is a list of orientations for each hand
+        hands_list = []
+        for hand in self.hands_list:
+            hands_list.append(hand.orientation_vector)
+        return hands_list
+
+    def print_hand(self, print_lm_list=False, print_handedness=False, print_orientation=False, print_orientation_vector=False):
         hands_list = self.get_hands()
         for hand in hands_list:
             print("Hand", hands_list.index(hand))
-            if print_lm_list:
-                print("      ", hand.lm_list)
-            if print_orientation:
-                print("      ", hand.orientation)
             if print_handedness:
                 print("      ", hand.handedness)
+            if print_orientation:
+                print("      ", hand.orientation)
+            if print_lm_list:
+                print("      ", hand.lm_list)
+            if print_orientation_vector:
+                print("      ", hand.orientation_vector)
         if hands_list:
             print()
         return
 
-    def identify_hand_num(self, img):
+    def identify_hand_num(self, img, font=cv2.FONT_HERSHEY_SIMPLEX, font_scale=1, color=(255, 0, 0), thickness=2, line_type=cv2.LINE_AA):
         hands_list = self.get_hands()
         for hand in hands_list:
             x, y = hand.lm_list[8][1], hand.lm_list[8][2]
             text = "Hand " + str(hands_list.index(hand)) + ", " + hand.handedness
-            img = cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+            img = cv2.putText(img, text, (x, y), font, font_scale, color, thickness, line_type)
         return img
 
 
@@ -133,7 +142,7 @@ def test():
         success, img = capture.read()
         img = cv2.flip(img, 1)
         img = ht.track_hand(img, identify_hand_num=True)
-        print("Number of hands: ", ht.count_hands())
+        print("orientation: ", ht.get_hand_orientation_vector())
 
         cv2.imshow("Camera", img)
         cv2.waitKey(1)
