@@ -18,10 +18,10 @@ def move_mouse(img, x_incr, y_incr):
     draw_tracking(img)
 
 
-def pinch(action):
+def pinch(img, action):
     if action == "click" or action == "Click":
         desktop.left_click()
-        draw_pinch()
+        draw_pinch(img)
     elif action == "hold" or action == "Hold":
         desktop.hold_left_click()
 
