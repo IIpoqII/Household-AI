@@ -20,13 +20,26 @@ def detect(hand, upper_bound=120):
     return dist1 < upper_bound and dist2 < upper_bound
 
 
-def move_mouse(img, x_incr, y_incr):
+def move_mouse(x_incr, y_incr):
+    x_incr = round(x_incr)
+    y_incr = round(y_incr)
+    pos = list(desktop.get_mouse_position())
+    pos[0] = pos[0] + x_incr
+    pos[1] = pos[1] + y_incr
+    if pos[1] <= 0:
+        pos[1] = 1
+    if pos[1] >= screen_h:
+        pos[1] = screen_h - 1
+    desktop.move_mouse_rel(pos[0], pos[1])
+
+
+def move_mouse_rel(x_incr, y_incr):
     x_incr = round(x_incr)
     y_incr = round(y_incr)
     desktop.move_mouse_rel(x_incr, y_incr)
 
 
-def pinch(img, action):
+def pinch(action):
     if action == "click" or action == "Click":
         desktop.left_click()
     elif action == "hold" or action == "Hold":
@@ -63,6 +76,7 @@ capture.set(3, cam_width)
 capture.set(4, cam_height)
 ht = HandTracker.HandRecognition()
 desktop = DesktopControl.DesktopControl()
+screen_w, screen_h = desktop.get_screen_size()
 
 action = "click"
 dictionary = {
@@ -117,10 +131,10 @@ while True:
                     x_diff = sens * (mdpt_new[0] - mdpt_orig[0])
                     y_diff = sens * (mdpt_new[1] - mdpt_orig[1])
                     if x_diff <= -min_incr or x_diff >= min_incr:
-                        move_mouse(img, x_diff, y_diff)
+                        move_mouse(x_diff, y_diff)
                         mdpt_orig = mdpt_new
                     elif y_diff <= -min_incr or y_diff >= min_incr:
-                        move_mouse(img, x_diff, y_diff)
+                        move_mouse_rel(x_diff, y_diff)
                         mdpt_orig = mdpt_new
 
                     # detect for pinch gesture
@@ -133,7 +147,7 @@ while True:
                     for dist in dist_list:
                         if dist < pinch_bound:
                             # executes pinch gesture
-                            pinch(img, action)
+                            pinch(action)
                             if action == "click" or action == "Click":
                                 draw_pinch(img, mdpt_new[0], mdpt_new[1])
                             elif action == "hold" or action == "Hold":
