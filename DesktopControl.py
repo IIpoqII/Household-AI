@@ -2,7 +2,7 @@ import pyautogui
 
 
 class DesktopControl:
-    def get_screen_size:
+    def get_screen_size(self):
         return pyautogui.size()
 
     def get_mouse_position(self):
