@@ -23,3 +23,6 @@ class DesktopControl:
 
     def release_left_click(self):
         pyautogui.mouseUp(_pause=False)
+
+    def get_failsafe_points(self):
+        return pyautogui.FAILSAFE_POINTS
