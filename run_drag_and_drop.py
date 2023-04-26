@@ -5,6 +5,7 @@ import DesktopControl
 
 
 # --------------------------------
+UI_scale = 0.95
 maintain_tracking = True
 hand_num = 0
 # --------------------------------
@@ -20,23 +21,44 @@ def detect(hand, upper_bound=120):
     return dist1 < upper_bound and dist2 < upper_bound
 
 
-def move_mouse(x_incr, y_incr):
-    x_incr = round(x_incr)
-    y_incr = round(y_incr)
-    pos = list(desktop.get_mouse_position())
-    pos[0] = pos[0] + x_incr
-    pos[1] = pos[1] + y_incr
-    if pos[1] <= 0:
-        pos[1] = 1
-    if pos[1] >= screen_h:
-        pos[1] = screen_h - 1
-    desktop.move_mouse_rel(pos[0], pos[1])
+def move_mouse(x, y):
+    x = round(x)
+    y = round(y)
+    pos = (x, y)
+    pos = list(pos)
+    pos = bound_to_screen(pos)
+    pos = adjust_for_corner_failsafe(pos)
+    desktop.move_mouse(pos[0], pos[1])
 
 
 def move_mouse_rel(x_incr, y_incr):
     x_incr = round(x_incr)
     y_incr = round(y_incr)
+    pos = list(desktop.get_mouse_position())
+    pos[0] = pos[0] + x_incr
+    pos[1] = pos[1] + y_incr
+    pos = bound_to_screen(pos)
+    adjust_for_corner_failsafe(pos)
+    print(pos)
     desktop.move_mouse_rel(x_incr, y_incr)
+
+
+def bound_to_screen(pos):
+    pos[0] = max(0, min(screen_w, pos[0]))
+    pos[1] = max(0, min(screen_h, pos[1]))
+    return pos
+
+
+def adjust_for_corner_failsafe(pos):
+    if pos[0] <= 0:
+        pos[1] = 1
+    if pos[1] <= 0:
+        pos[0] = 1
+    if pos[0] >= screen_w:
+        pos[1] = screen_w - 20
+    if pos[1] >= screen_h:
+        pos[0] = screen_h - 20
+    return pos
 
 
 def pinch(action):
@@ -70,6 +92,14 @@ def draw_hold(img):
     cv2.circle(img, (x, y), 20, (0, 255, 255), 2)
 
 
+def test_UI_bounded(x1, y1):
+    return UI_box[0][0] < x1 < UI_box[1][0] and UI_box[0][1] < y1 < UI_box[1][1]
+
+
+def draw_bounded_area(img):
+    cv2.rectangle(img, (UI_box[0][0], UI_box[0][1]), (UI_box[1][0], UI_box[1][1]), (0, 255, 0), 2)
+
+
 cam_width, cam_height = 1280, 720
 capture = cv2.VideoCapture(0)
 capture.set(3, cam_width)
@@ -88,6 +118,18 @@ pinch_fingers = [1, 2]
 pinch_bound = 40
 sens = 4
 min_incr = 2
+
+# bounding box for the UI area
+x_ratio = screen_w / cam_width
+y_ratio = screen_h / cam_height
+if x_ratio > y_ratio:
+    ratio = x_ratio
+else:
+    ratio = y_ratio
+
+x_screen_diff = round((1 - UI_scale) * (screen_w / ratio))
+y_screen_diff = round((1 - UI_scale) * (screen_h / ratio))
+UI_box = (x_screen_diff - 1, y_screen_diff - 1), ((cam_width - x_screen_diff - 1), (cam_height - y_screen_diff - 1))
 
 while True:
     success, img = capture.read()
@@ -122,19 +164,18 @@ while True:
                             hand_count = hand_count_new
                         else:
                             break
+                    draw_bounded_area(img)
 
                     # track position
                     hand = ht.get_hands()[hand_num]
                     lm_list = hand.lm_list
                     x0, y0 = lm_list[4][1], lm_list[4][2]
                     mdpt_new = get_midpoint(x0, y0, lm_list[12][1], lm_list[12][2])
-                    x_diff = sens * (mdpt_new[0] - mdpt_orig[0])
-                    y_diff = sens * (mdpt_new[1] - mdpt_orig[1])
-                    if x_diff <= -min_incr or x_diff >= min_incr:
-                        move_mouse(x_diff, y_diff)
-                        mdpt_orig = mdpt_new
-                    elif y_diff <= -min_incr or y_diff >= min_incr:
-                        move_mouse_rel(x_diff, y_diff)
+                    x_diff = ratio * (mdpt_new[0] - mdpt_orig[0])
+                    y_diff = ratio * (mdpt_new[1] - mdpt_orig[1])
+                    if x_diff <= -min_incr or x_diff >= min_incr or y_diff <= -min_incr or y_diff >= min_incr:
+                        UI_mdpt = mdpt_new[0] - x_screen_diff, mdpt_new[1] - y_screen_diff
+                        move_mouse(UI_mdpt[0] * ratio / (UI_scale - (1-UI_scale)), UI_mdpt[1] * ratio / (UI_scale - (1-UI_scale)))
                         mdpt_orig = mdpt_new
 
                     # detect for pinch gesture
